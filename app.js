@@ -34,8 +34,28 @@
     currentYear: new Date().getFullYear(),
     currentMonth: new Date().getMonth(),
     menus: {},
-    candidates: { delivery: [...DEFAULT_DELIVERY], eatout: [...DEFAULT_EATOUT] }
+    candidates: { delivery: [...DEFAULT_DELIVERY], eatout: [...DEFAULT_EATOUT] },
+    dirty: false,
+    candidateSort: { delivery: 'asc', eatout: 'asc' }
   };
+
+  function setDirty(value) {
+    state.dirty = !!value;
+    updateSaveButton();
+  }
+
+  function updateSaveButton() {
+    var btn = document.getElementById('saveToServerBtn');
+    var label = document.getElementById('saveToServerLabel');
+    if (!btn) return;
+    if (isShared()) {
+      btn.hidden = false;
+      btn.disabled = !state.dirty;
+      if (label) label.textContent = state.dirty ? '저장되지 않은 변경이 있습니다' : '저장됨';
+    } else {
+      btn.hidden = true;
+    }
+  }
 
   function loadMenusFromStorage() {
     try {
@@ -70,6 +90,7 @@
       delivery: (data.candidates && data.candidates.delivery && data.candidates.delivery.length) ? data.candidates.delivery : [...DEFAULT_DELIVERY],
       eatout: (data.candidates && data.candidates.eatout && data.candidates.eatout.length) ? data.candidates.eatout : [...DEFAULT_EATOUT]
     };
+    state.dirty = false;
     return true;
   }
 
@@ -86,12 +107,29 @@
 
   function saveMenus() {
     localStorage.setItem(STORAGE_MENUS, JSON.stringify(state.menus));
-    if (isShared()) saveToSupabase();
+    setDirty(true);
   }
 
   function saveCandidates() {
     localStorage.setItem(STORAGE_CANDIDATES, JSON.stringify(state.candidates));
-    if (isShared()) saveToSupabase();
+    setDirty(true);
+  }
+
+  async function saveToServer() {
+    if (!isShared() || !state.dirty) return;
+    try {
+      await saveToSupabase();
+      state.dirty = false;
+      updateSaveButton();
+      var label = document.getElementById('saveToServerLabel');
+      if (label) label.textContent = '저장됨';
+      setTimeout(function () {
+        if (label && !state.dirty) label.textContent = '';
+      }, 2000);
+    } catch (_) {
+      var label = document.getElementById('saveToServerLabel');
+      if (label) label.textContent = '저장 실패';
+    }
   }
 
   function monthKey(year, month) {
@@ -311,23 +349,42 @@
     document.getElementById('todayLabel').textContent = `오늘: ${t.toLocaleDateString('ko-KR', options)}`;
   }
 
+  function sortCandidates(type) {
+    const order = state.candidateSort[type] === 'asc' ? 'desc' : 'asc';
+    state.candidateSort[type] = order;
+    const arr = [...state.candidates[type]];
+    arr.sort(function (a, b) {
+      return a.localeCompare(b, 'ko');
+    });
+    if (order === 'desc') arr.reverse();
+    state.candidates[type] = arr;
+    saveCandidates();
+    renderSidebarLists();
+    updateSortButtonLabels();
+  }
+
+  function updateSortButtonLabels() {
+    var deliveryBtn = document.getElementById('sortDeliveryBtn');
+    var eatoutBtn = document.getElementById('sortEatoutBtn');
+    if (deliveryBtn) deliveryBtn.textContent = state.candidateSort.delivery === 'asc' ? '가나다순 ↑' : '역순 ↓';
+    if (eatoutBtn) eatoutBtn.textContent = state.candidateSort.eatout === 'asc' ? '가나다순 ↑' : '역순 ↓';
+  }
+
   function renderSidebarLists() {
     function listHtml(type, listId) {
       const ul = document.getElementById(listId);
-      ul.innerHTML = state.candidates[type].map((name, i) => {
-        const canRemove = (type === 'delivery' && !DEFAULT_DELIVERY.includes(name)) ||
-          (type === 'eatout' && !DEFAULT_EATOUT.includes(name));
-        return `<li>
-          <span>${name}</span>
-          ${canRemove ? `<button type="button" class="remove-btn" data-type="${type}" data-name="${name}" aria-label="삭제">×</button>` : ''}
-        </li>`;
+      ul.innerHTML = state.candidates[type].map(function (name) {
+        return '<li><span>' + name + '</span><button type="button" class="remove-btn" data-type="' + type + '" data-name="' + name + '" aria-label="삭제">×</button></li>';
       }).join('');
-      ul.querySelectorAll('.remove-btn').forEach(btn => {
-        btn.addEventListener('click', () => removeMenu(btn.dataset.type, btn.dataset.name));
+      ul.querySelectorAll('.remove-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          removeMenu(btn.dataset.type, btn.dataset.name);
+        });
       });
     }
     listHtml('delivery', 'deliveryList');
     listHtml('eatout', 'eatoutList');
+    updateSortButtonLabels();
   }
 
   function addMenu() {
@@ -386,7 +443,7 @@
     if (isShared()) {
       if (bannerLocal) bannerLocal.hidden = true;
       if (bannerSync) { bannerSync.hidden = false; }
-      if (hintShare) hintShare.textContent = '바꾼 메뉴와 추가한 후보가 팀원에게도 공유됩니다.';
+      if (hintShare) hintShare.textContent = '메뉴·후보를 바꾼 뒤 "서버에 저장"을 누르면 팀원에게 반영됩니다.';
     } else {
       if (bannerLocal) { bannerLocal.hidden = false; }
       if (bannerSync) bannerSync.hidden = true;
@@ -406,6 +463,7 @@
       state.candidates = loadCandidatesFromStorage();
     }
     setBanners();
+    updateSaveButton();
     updateMonthLabel();
     updateTodayLabel();
     renderCalendar();
@@ -420,6 +478,12 @@
     document.getElementById('closeModal').addEventListener('click', closeModal);
     document.getElementById('modalBackdrop').addEventListener('click', closeModal);
     document.getElementById('resetMonth').addEventListener('click', resetCurrentMonth);
+    var saveBtn = document.getElementById('saveToServerBtn');
+    if (saveBtn) saveBtn.addEventListener('click', saveToServer);
+    var sortDeliveryBtn = document.getElementById('sortDeliveryBtn');
+    var sortEatoutBtn = document.getElementById('sortEatoutBtn');
+    if (sortDeliveryBtn) sortDeliveryBtn.addEventListener('click', function () { sortCandidates('delivery'); });
+    if (sortEatoutBtn) sortEatoutBtn.addEventListener('click', function () { sortCandidates('eatout'); });
   }
 
   init();

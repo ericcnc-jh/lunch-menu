@@ -9,7 +9,13 @@
 <body>
   <div class="app">
     <div class="banner banner-local" id="bannerLocal" hidden>팀과 공유하려면 Supabase를 설정해 주세요. <a href="README.md#팀-공유-설정">설정 방법</a></div>
-    <div class="banner banner-sync" id="bannerSync" hidden>✓ 팀과 공유 중 — 바꾼 메뉴가 팀원에게도 보입니다.</div>
+    <div class="banner banner-sync" id="bannerSync" hidden>
+      <span>✓ 팀과 공유 중 — 저장 버튼을 누르면 팀원에게 반영됩니다.</span>
+      <div class="save-row">
+        <button type="button" class="btn btn-save" id="saveToServerBtn" hidden>서버에 저장</button>
+        <span class="save-label" id="saveToServerLabel"></span>
+      </div>
+    </div>
     <header class="header">
       <h1>🍽️ 점심 메뉴 달력</h1>
       <div class="month-nav">
@@ -49,12 +55,18 @@
         <section class="card">
           <h3>현재 메뉴 목록</h3>
           <div class="menu-lists">
-            <div>
-              <strong>배달</strong>
+            <div class="menu-list-block">
+              <div class="list-header">
+                <strong>배달</strong>
+                <button type="button" class="btn btn-sort" id="sortDeliveryBtn" title="가나다순/역순">가나다순 ↑</button>
+              </div>
               <ul id="deliveryList"></ul>
             </div>
-            <div>
-              <strong>나가서 먹기</strong>
+            <div class="menu-list-block">
+              <div class="list-header">
+                <strong>나가서 먹기</strong>
+                <button type="button" class="btn btn-sort" id="sortEatoutBtn" title="가나다순/역순">가나다순 ↑</button>
+              </div>
               <ul id="eatoutList"></ul>
             </div>
           </div>

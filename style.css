@@ -57,6 +57,73 @@ body {
   border: 1px solid #28a745;
 }
 
+.banner-sync .save-row {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.btn-save {
+  background: #28a745;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-save:hover:not(:disabled) {
+  background: #218838;
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.save-label {
+  font-size: 0.85rem;
+  color: #155724;
+}
+
+.menu-list-block {
+  margin-bottom: 0.75rem;
+}
+
+.menu-list-block:last-child {
+  margin-bottom: 0;
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.list-header strong {
+  margin: 0;
+}
+
+.btn-sort {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.btn-sort:hover {
+  background: #f0ebe6;
+  color: var(--text);
+}
+
 .header {
   text-align: center;
   margin-bottom: 1.5rem;
