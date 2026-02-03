@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>월별 점심 메뉴 달력</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1>🍽️ 점심 메뉴 달력</h1>
+      <div class="month-nav">
+        <button type="button" class="btn-nav" id="prevMonth" aria-label="이전 달">‹</button>
+        <h2 id="currentMonth"></h2>
+        <button type="button" class="btn-nav" id="nextMonth" aria-label="다음 달">›</button>
+      </div>
+      <p class="today-label" id="todayLabel"></p>
+    </header>
+
+    <main class="main">
+      <div class="calendar-wrap">
+        <div class="weekdays">
+          <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+        </div>
+        <div class="calendar" id="calendar"></div>
+      </div>
+
+      <aside class="sidebar">
+        <section class="card">
+          <h3>메뉴 변경</h3>
+          <p class="hint">날짜를 클릭한 뒤 원하는 메뉴를 선택하세요.</p>
+        </section>
+        <section class="card">
+          <h3>메뉴 후보 추가</h3>
+          <div class="add-menu">
+            <select id="addCategory">
+              <option value="delivery">배달</option>
+              <option value="eatout">나가서 먹기</option>
+            </select>
+            <input type="text" id="newMenuName" placeholder="메뉴 이름 입력">
+            <button type="button" class="btn btn-add" id="addMenuBtn">추가</button>
+          </div>
+        </section>
+        <section class="card">
+          <h3>현재 메뉴 목록</h3>
+          <div class="menu-lists">
+            <div>
+              <strong>배달</strong>
+              <ul id="deliveryList"></ul>
+            </div>
+            <div>
+              <strong>나가서 먹기</strong>
+              <ul id="eatoutList"></ul>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <!-- 메뉴 변경 모달 -->
+  <div class="modal" id="changeModal" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-content">
+      <h3 id="modalTitle">메뉴 변경</h3>
+      <p class="modal-date" id="modalDate"></p>
+      <div class="modal-categories">
+        <div>
+          <strong>배달</strong>
+          <ul id="modalDeliveryList"></ul>
+        </div>
+        <div>
+          <strong>나가서 먹기</strong>
+          <ul id="modalEatoutList"></ul>
+        </div>
+      </div>
+      <button type="button" class="btn btn-close-modal" id="closeModal">닫기</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,389 @@
+:root {
+  --bg: #faf8f5;
+  --surface: #fff;
+  --text: #2c2c2c;
+  --text-muted: #666;
+  --accent: #c45c26;
+  --accent-soft: #e8a77c;
+  --delivery: #2d6a4f;
+  --eatout: #1d3557;
+  --today: #c45c26;
+  --border: #e8e4df;
+  --shadow: 0 2px 12px rgba(0,0,0,0.06);
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+  color: var(--text);
+}
+
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.btn-nav {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text);
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-nav:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+#currentMonth {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin: 0;
+  min-width: 140px;
+}
+
+.today-label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.main {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .main {
+    grid-template-columns: 1fr;
+  }
+}
+
+.calendar-wrap {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  overflow: hidden;
+}
+
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.day-cell {
+  min-height: 100px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.day-cell:hover {
+  background: #f8f6f3;
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.day-cell.other-month {
+  opacity: 0.45;
+  background: #f5f3f0;
+}
+
+.day-cell.other-month .day-num {
+  color: var(--text-muted);
+}
+
+.day-cell.today {
+  border-color: var(--today);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+  background: #fff8f4;
+}
+
+.day-cell.weekend {
+  background: #f8f6f3;
+}
+
+.day-num {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+
+.day-cell.today .day-num {
+  color: var(--today);
+}
+
+.day-menu {
+  font-size: 0.75rem;
+  color: var(--text);
+  line-height: 1.35;
+  word-break: keep-all;
+}
+
+.day-menu.delivery {
+  color: var(--delivery);
+  font-weight: 500;
+}
+
+.day-menu.eatout {
+  color: var(--eatout);
+  font-weight: 500;
+}
+
+.day-cell.empty .day-menu {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+}
+
+.card h3 {
+  font-size: 1rem;
+  margin: 0 0 0.75rem;
+  color: var(--text);
+}
+
+.hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.add-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.add-menu select {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: var(--surface);
+}
+
+.add-menu input {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-add {
+  background: var(--accent);
+  color: white;
+}
+
+.btn-add:hover {
+  background: #a84d1e;
+}
+
+.btn-close-modal {
+  width: 100%;
+  margin-top: 1rem;
+  background: var(--text-muted);
+  color: white;
+}
+
+.btn-close-modal:hover {
+  background: var(--text);
+}
+
+.menu-lists ul,
+.modal-categories ul {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.menu-lists li,
+.modal-categories li {
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.menu-lists li:last-child,
+.modal-categories li:last-child {
+  border-bottom: none;
+}
+
+.modal-categories li {
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+}
+
+.modal-categories li:hover {
+  background: #f0ebe6;
+  border-color: var(--border);
+}
+
+.menu-lists .remove-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px 6px;
+  font-size: 0.9rem;
+  border-radius: 4px;
+}
+
+.menu-lists .remove-btn:hover {
+  color: var(--accent);
+  background: #fff0e8;
+}
+
+.menu-lists strong,
+.modal-categories strong {
+  display: block;
+  margin-top: 0.75rem;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.menu-lists strong:first-child,
+.modal-categories strong:first-child {
+  margin-top: 0;
+}
+
+/* 모달 */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+
+.modal.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+  position: relative;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  padding: 1.5rem;
+  max-width: 420px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.modal-content h3 {
+  margin: 0 0 0.5rem;
+}
+
+.modal-date {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0 0 1rem;
+}
+
+.modal-categories > div {
+  margin-bottom: 1rem;
+}
+
+.modal-categories > div:last-of-type {
+  margin-bottom: 0;
+}
+
+.modal-categories ul {
+  max-height: 180px;
+}
