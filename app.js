@@ -149,6 +149,52 @@
     return d >= 1 && d <= 5;
   }
 
+  /** 한국 공휴일: 점심 메뉴 없음 (직장인 기준) */
+  var KOREA_HOLIDAYS = {
+    '1-1': true,   // 신정
+    '3-1': true,   // 삼일절
+    '5-5': true,   // 어린이날
+    '6-6': true,   // 현충일
+    '8-15': true,  // 광복절
+    '10-3': true,  // 개천절
+    '10-9': true,  // 한글날
+    '12-25': true  // 크리스마스
+  };
+  var LUNAR_HOLIDAYS = [
+    { y: 2024, s: [[2, 9], [2, 10], [2, 11], [2, 12]], c: [[9, 16], [9, 17], [9, 18]] },
+    { y: 2025, s: [[1, 28], [1, 29], [1, 30], [1, 31]], c: [[10, 5], [10, 6], [10, 7], [10, 8]] },
+    { y: 2026, s: [[2, 16], [2, 17], [2, 18]], c: [[9, 24], [9, 25], [9, 26], [9, 27]] },
+    { y: 2027, s: [[2, 6], [2, 7], [2, 8], [2, 9]], c: [[9, 14], [9, 15], [9, 16], [9, 17]] },
+    { y: 2028, s: [[1, 26], [1, 27], [1, 28], [1, 29]], c: [[10, 2], [10, 3], [10, 4], [10, 5]] },
+    { y: 2029, s: [[2, 13], [2, 14], [2, 15]], c: [[9, 21], [9, 22], [9, 23], [9, 24]] },
+    { y: 2030, s: [[2, 2], [2, 3], [2, 4], [2, 5]], c: [[9, 11], [9, 12], [9, 13], [9, 14]] }
+  ];
+
+  function isHoliday(year, month, date) {
+    var m = month + 1;
+    var d = date;
+    if (KOREA_HOLIDAYS[m + '-' + d]) return true;
+    for (var i = 0; i < LUNAR_HOLIDAYS.length; i++) {
+      var h = LUNAR_HOLIDAYS[i];
+      if (h.y !== year) continue;
+      var j, arr;
+      arr = h.s;
+      for (j = 0; j < arr.length; j++) {
+        if (arr[j][0] === m && arr[j][1] === d) return true;
+      }
+      arr = h.c;
+      for (j = 0; j < arr.length; j++) {
+        if (arr[j][0] === m && arr[j][1] === d) return true;
+      }
+    }
+    return false;
+  }
+
+  /** 평일이면서 공휴일이 아닐 때만 메뉴 배정 */
+  function isWorkday(year, month, date) {
+    return isWeekday(year, month, date) && !isHoliday(year, month, date);
+  }
+
   /** 문자열 시드로 항상 같은 순서의 난수를 만듦 → 누가 열어도 같은 달력 */
   function createSeededRandom(seedStr) {
     let h = 0;
@@ -191,7 +237,7 @@
 
     const weekWeekdays = {};
     for (let d = 1; d <= daysInMonth; d++) {
-      if (!isWeekday(year, month, d)) continue;
+      if (!isWorkday(year, month, d)) continue;
       const wk = getWeekId(year, month, d);
       if (!weekWeekdays[wk]) weekWeekdays[wk] = [];
       weekWeekdays[wk].push(d);
@@ -228,10 +274,18 @@
   }
 
   function getMenuForDay(year, month, date) {
-    if (!isWeekday(year, month, date)) return null;
+    if (!isWorkday(year, month, date)) return null;
     const key = monthKey(year, month);
     ensureMonthGenerated(year, month);
-    return state.menus[key][String(date)] || null;
+    var raw = state.menus[key] ? state.menus[key][String(date)] : null;
+    if (!raw || raw.name == null) return null;
+    return { name: String(raw.name), type: raw.type === 'eatout' ? 'eatout' : 'delivery' };
+  }
+
+  function menuLabel(menu) {
+    if (!menu || menu.name == null) return '—';
+    var s = String(menu.name).trim();
+    return s === '' ? '—' : s;
   }
 
   function setMenuForDay(year, month, date, name, type) {
@@ -263,23 +317,22 @@
       const prevY = currentMonth === 0 ? currentYear - 1 : currentYear;
       const menu = getMenuForDay(prevY, prevM, d);
       const weekend = getDayOfWeek(prevY, prevM, d) === 0 || getDayOfWeek(prevY, prevM, d) === 6;
-      html += `<div class="day-cell other-month weekend-${weekend}" data-year="${prevY}" data-month="${prevM}" data-date="${d}">
-        <span class="day-num">${d}</span>
-        <div class="day-menu ${menu ? menu.type : 'empty'}">${menu ? menu.name : '—'}</div>
-      </div>`;
+      const prevHoliday = isHoliday(prevY, prevM, d);
+      var prevText = prevHoliday ? '휴일' : menuLabel(menu);
+      html += '<div class="day-cell other-month weekend-' + weekend + (prevHoliday ? ' holiday' : '') + '" data-year="' + prevY + '" data-month="' + prevM + '" data-date="' + d + '"><span class="day-num">' + d + '</span><div class="day-menu ' + (menu ? menu.type : 'empty') + '">' + prevText + '</div></div>';
       dayCount++;
     }
 
     for (let d = 1; d <= daysInMonth; d++) {
       const dow = getDayOfWeek(currentYear, currentMonth, d);
       const weekend = dow === 0 || dow === 6;
+      const holiday = isHoliday(currentYear, currentMonth, d);
       const menu = getMenuForDay(currentYear, currentMonth, d);
       const todayClass = isToday(currentYear, currentMonth, d) ? ' today' : '';
       const weekendClass = weekend ? ' weekend' : '';
-      html += `<div class="day-cell${todayClass}${weekendClass}" data-year="${currentYear}" data-month="${currentMonth}" data-date="${d}">
-        <span class="day-num">${d}</span>
-        <div class="day-menu ${menu ? menu.type : 'empty'}">${menu ? menu.name : '—'}</div>
-      </div>`;
+      const holidayClass = holiday ? ' holiday' : '';
+      var dayText = holiday ? '휴일' : menuLabel(menu);
+      html += '<div class="day-cell' + todayClass + weekendClass + holidayClass + '" data-year="' + currentYear + '" data-month="' + currentMonth + '" data-date="' + d + '"><span class="day-num">' + d + '</span><div class="day-menu ' + (menu ? menu.type : 'empty') + '">' + dayText + '</div></div>';
       dayCount++;
     }
 
@@ -290,10 +343,9 @@
       const nextY = currentMonth === 11 ? currentYear + 1 : currentYear;
       const menu = getMenuForDay(nextY, nextM, d);
       const weekend = getDayOfWeek(nextY, nextM, d) === 0 || getDayOfWeek(nextY, nextM, d) === 6;
-      html += `<div class="day-cell other-month weekend-${weekend}" data-year="${nextY}" data-month="${nextM}" data-date="${d}">
-        <span class="day-num">${d}</span>
-        <div class="day-menu ${menu ? menu.type : 'empty'}">${menu ? menu.name : '—'}</div>
-      </div>`;
+      const nextHoliday = isHoliday(nextY, nextM, d);
+      var nextText = nextHoliday ? '휴일' : menuLabel(menu);
+      html += '<div class="day-cell other-month weekend-' + weekend + (nextHoliday ? ' holiday' : '') + '" data-year="' + nextY + '" data-month="' + nextM + '" data-date="' + d + '"><span class="day-num">' + d + '</span><div class="day-menu ' + (menu ? menu.type : 'empty') + '">' + nextText + '</div></div>';
     }
 
     document.getElementById('calendar').innerHTML = html;
@@ -429,9 +481,8 @@
 
   /** 이 달을 시드 기반으로 다시 생성 → 다른 사람들과 동일한 달력으로 맞춤 */
   function resetCurrentMonth() {
-    const key = monthKey(state.currentYear, state.currentMonth);
+    var key = monthKey(state.currentYear, state.currentMonth);
     delete state.menus[key];
-    saveMenus();
     generateMonthMenus(state.currentYear, state.currentMonth);
     renderCalendar();
   }

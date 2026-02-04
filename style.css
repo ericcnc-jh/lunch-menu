@@ -247,6 +247,11 @@ body {
   background: #f8f6f3;
 }
 
+.day-cell.holiday .day-menu {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 .day-num {
   font-size: 0.85rem;
   font-weight: 600;
